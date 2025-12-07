@@ -6,7 +6,7 @@ if __name__ == '__main__':
     jolt = ''
     def g(x):
         global jolt
-        num = ''
+        num = '0'
         pen = 0
         if np.sum(x) != 12:
             pen = 1e100 * np.sum(x)
@@ -22,14 +22,14 @@ if __name__ == '__main__':
     accum_jolt = 0
 
     algorithm_param = {'max_num_iteration': 3000,
-                       'population_size': 1000,
+                       'population_size': 2000,
                        'mutation_probability': 0.01,
                        'elit_ratio': 0.05,
-                       'crossover_probability': 0.8,
+                       'crossover_probability': 0.5,
                        'parents_portion': 0.3,
                        'crossover_type': 'uniform',
-                       'max_iteration_without_improv': 50,
-                       'convergence_curve': False}
+                       'max_iteration_without_improv': 300,
+                       }
     for line in lines:
 
         nums = [i for i in line.replace('\n', '')]
@@ -38,5 +38,6 @@ if __name__ == '__main__':
         model.run()
         solution = -int(model.output_dict['function'])
         accum_jolt += solution
+        #break
     print('\n')
     print(accum_jolt)
