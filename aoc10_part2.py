@@ -3,64 +3,64 @@ from geneticalgorithm import geneticalgorithm as ga
 
 
 if __name__ == '__main__':
-    def generate_binary_strings(bit_count):
-        binary_strings = []
-
-        def genbin(n, bs=''):
-            if len(bs) == n:
-                binary_strings.append(bs)
-            else:
-                genbin(n, bs + '0')
-                genbin(n, bs + '1')
-
-        genbin(bit_count)
-        return binary_strings
     
-    diagram = []
+    joltage = []
     buttons = []
     def g(x):
-        global diagram
+        global joltage
         global buttons
-        new_diagram = [0] * len(diagram)
-        #print(new_diagram)
+        new_joltage = [0] * len(joltage)
+        #print(new_joltage)
+        #print(joltage)
+        #print(buttons)
+        #print(x)
+        #print(buttons)
         for i in range(len(x)):
-            if int(x[i]) % 2 != 0:
-                if isinstance(buttons[i], int):
-                    if new_diagram[buttons[i]] == 0:
-                        new_diagram[buttons[i]] = 1
-                    else:
-                        new_diagram[buttons[i]] = 0
-                else:
-                    for j in buttons[i]:
-                        if new_diagram[j] == 0:
-                            new_diagram[j] = 1
-                        else:
-                            new_diagram[j] = 0
-        if diagram == new_diagram:
-            return sum([int(i) for i in x]), x
-        return 0, x
+            if isinstance(buttons[i], int):
+                new_joltage[buttons[i]] += x[i]
+            else:
+                for j in buttons[i]:
+                    new_joltage[j] += x[i]
+        #print(new_joltage)
+        pen = 0
+        if joltage != new_joltage:
+            pen = 1e6#sum([1e6 * abs(joltage[i] - new_joltage[i]) for i in range(len(joltage))])
+            #print(x)
+            #print(new_joltage)
+            #print(joltage)
+        return sum([abs(joltage[i] - new_joltage[i]) for i in range(len(joltage))]) + int(np.sum(x)) + pen
+
+
+    algorithm_param = {'max_num_iteration': 3000,
+                       'population_size': 2000,
+                       'mutation_probability': 0.01,
+                       'elit_ratio': 0.05,
+                       'crossover_probability': 0.5,
+                       'parents_portion': 0.3,
+                       'crossover_type': 'uniform',
+                       'max_iteration_without_improv': 600,
+                       }
     
     f = open('./data/input10.txt')
     lines = f.readlines()
-    button_pushes = 0
     total_pushes = 0
     for line in lines:
-        
         diagram = [1 if x == '#' else 0 for x in line.split()[0].replace('[', '').replace(']', '')]
-        joltage = line.split()[-1]
+        joltage = [x for x in eval(line.split()[-1].replace('{', '').replace('}', ''))]
         buttons = [eval(x) for x in line.split()[1:-1]]
-
+        #print(joltage) 
         #print(buttons)
         #print(diagram)
-        
-        min_pushes = 1e6
-        possible_button_pushes = [list(x) for x in generate_binary_strings(len(buttons))]
-        for pushes in possible_button_pushes:
-            a, b = g(pushes)
-            if a > 0 and a < min_pushes:
-                min_pushes = a
-        total_pushes += min_pushes
-
+        varbound = np.array([[0, max(joltage)]] * len(buttons))
+        model = ga(function=g,
+                   dimension=len(buttons),
+                   variable_type='int',
+                   variable_boundaries=varbound,
+                   algorithm_parameters=algorithm_param)
+        model.run()
+        solution = int(model.output_dict['function'])
+        total_pushes += solution
+        # break
     print('\n')
     print(total_pushes)
         
